@@ -87,49 +87,32 @@ def helper():
 	print("-in - Inventory\n-ma - Make Axe\n-mp - Make pickaxe\n-mt - Make Trap")
 	print("-n - Nothing")
 	main()
-def make_camp_fire():
-	if g.inventory_dict["tree"] >= 2 and g.inventory_dict["stone"] >= 4 and g.inventory_dict["tree"] >= 2:
-		g.inventory_dict["tree"] -= 2
-		g.inventory_dict["stone"] -= 4
-		g.inventory_dict["tree"] -= 2
+
+def make_trap(raw_m, raw_m1, m_raw_m):
+	if g.inventory_dict[raw_m] >= 6 and g.inventory_dict[raw_m1] >= 3:
+		g.inventory_dict[raw_m] -= 6
+		g.inventory_dict[raw_m1] -= 3
 		action_point -= 1
-		g.atlas[g.pos_x][g.pos_y] = "X"
-		print("Succesfull, +1 campfire")
+		print("Succesfull, +1 ", m_raw_m)
 	else:
 		print("Not enough raw materials")
 		helper()
-def make_trap():
-	if g.inventory_dict["tree"] >= 6 and g.inventory_dict["bough"] >= 3:
-		g.inventory_dict["tree"] -= 6
-		g.inventory_dict["bough"] -= 3
-		action_point -= 1
-		print("Succesfull, +1 trap")
+
+def cooking(raw_m, co_raw_m):
+	tmp_l = g.inventory_dict[raw_m]
+	if tmp_l[0] >= 2:
+		g.action_point -= 1
+		tmp_l = g.inventory_dict[raw_m]
+		tmp_l[0] -= 2
+		g.inventory_dict[raw_m] = tmp_l
+		tmp_l = g.inventory_dict[co_raw_m]
+		tmp_l[0] += 1
+		g.inventory_dict[co_raw_m] = tmp_l
+		print("Succesfull, +1 " co_raw_m)
 	else:
-		print("Not enough raw materials")
-		helper()
-def make_pickeaxe():
-	if g.inventory_dict["tree"] >= 2 and g.inventory_dict["grass"] >= 2:
-		g.inventory_dict["tree"] -= 2
-		g.inventory_dict["gras"] -= 2
-		action_point -= 1
-		print("Succesfull, +1 pickaxe")
-	else:
-		print("Not enough raw materials")
-		helper()
-def make_axe():
-	if g.inventory_dict["grass"] >= 2 and g.inventory_dict["tree"] >= 3:
-		g.inventory_dict["grass"] -= 2
-		g.inventory_dict["tree"]  -= 3
-		action_point -= 1
-		print("Succesfull, +1 axe")
-	else:
-		print("Not enough raw materials")
-		helper()
-def berry_cooking():
-	action_point -= 1
-	
-def eating():
-	print(g.atlas[""])
+		print("Not enough raw materials") 	
+def eating(raw_m):
+	print("eating")
 def my_control(action, circle):
 		condition_chechker()
 		if action == "s" and g.pos_x != g.size_x -1:
@@ -170,7 +153,7 @@ def my_control(action, circle):
 		elif action == "ea":
 			eating()
 		elif action == "co":
-			cooking()
+			berry_cooking()
 		elif action == "ma":
 			make_axe()
 		elif action == "mp":
@@ -221,12 +204,12 @@ if __name__ == "__main__":
 									"campfire": 10,
 									"trap": 10,
 									"wreath": 10,
-									"berry": [0, 10, -5, 1],  #c/hunger/hp/brain
-									"carrot": [0, 10, 0, 1],
-									"rabbit": [0, 15, -8, 2],
-									"boiled_berry": [0, 8, 0, 2],
-									"boiled_carrot": [0, 8, 2, 3],
-									"boiled_rabbit": [0, 22, 3, 4],
+									"berry": [10, 10, -5, 1],  #c/hunger/hp/brain
+									"carrot": [10, 10, 0, 1],
+									"rabbit": [10, 15, -8, 2],
+									"boiled_berry": [10, 8, 0, 2],
+									"boiled_carrot": [10, 8, 2, 3],
+									"boiled_rabbit": [10, 22, 3, 4],
 			},
 			my_map,
 			0)
