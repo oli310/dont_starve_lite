@@ -16,15 +16,15 @@ class Game:
 
 def where_am_i(jump_atlas):
 	print(my_map)
-	if jump_atlas == "T" and g.inventory_dict["axe"] > 0:
+	if jump_atlas == "T" :
 			print("Wood cutting? y/n")
-			activity_tool(jump_atlas, "axe", "tree", 0.2)
+			activity_tool(jump_atlas, "axe", "tree",10)
 	elif jump_atlas == "G":
 			print("ingathering? y/n")
 			activity(jump_atlas, "grass")
-	elif jump_atlas == "S":
+	elif jump_atlas == "S" :
 			print("Stone Mining? y/n")
-			activity_tool(jump_atlas, "pickaxe", "stone", 0.3)
+			activity_tool(jump_atlas, "pickaxe", "stone", 7)
 	elif jump_atlas == "B":
 			print("ingathering? y/n")
 			activity(jump_atlas, "bough")
@@ -37,16 +37,22 @@ def where_am_i(jump_atlas):
 			print("EMPTY")
 			g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
 	helper()
-def activity_tool(jump_atlas, tool, raw_m, tool_cor ):
+def activity_tool(jump_atlas, tool, raw_m, tool_cor): #pc,c
 	activity = input("Enter the action command: \n")
 	if activity == "y":
-		print("OK")
-		g.inventory_dict[tool] -= tool_cor
-		g.inventory_dict[raw_m]+=1
-		g.action_point -= 1
-		jump_atlas = "E"
-		g.atlas[g.pos_x][g.pos_y] = jump_atlas
-		print("OK, +1", raw_m)
+		tmp_l = g.inventory_dict[tool]
+		if tmp_l[1] > 0:
+			tmp_l[1] -= 1
+			g.inventory_dict[raw_m] += 1
+			g.inventory_dict[tool] = tmp_l
+		elif tmp_l[1] == 0 and tmp_l[0] > 1: 
+			tmp_l[1] += tool_cor
+			tmp_l[0] -= 1
+			g.inventory_dict[raw_m] += 1
+			g.inventory_dict[tool] = tmp_l
+		else:
+			print("Make ", tool)
+
 	elif activity == "n": 
 		g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
 		print("OK, EXIT")
@@ -56,7 +62,9 @@ def activity_tool(jump_atlas, tool, raw_m, tool_cor ):
 def activity(jump_atlas, raw_m):
 	activity = input("Enter the action command: \n")
 	if activity == "y":
-		g.inventory_dict[raw_m] += 1
+		tmp_l = g.inventory_dict[raw_m]
+		tmp_l[0] += 1
+		g.inventory_dict[raw_m] = tmp_l
 		g.action_point -= 1
 		jump_atlas = "E"
 		g.atlas[g.pos_x][g.pos_y] = "E"
@@ -69,15 +77,18 @@ def activity(jump_atlas, raw_m):
 		where_am_i(jump_atlas)
 def helper():
 	print("Control: W,A,S,D\n-m Map\n-ea - Eating\n-cf - Campfire\n-co - Cooking")
-	print("-in - Inventory\n-ma - Make Axe\n-mp - Make pickaxe\n-mt - Make Trap")
+	print("-in - Inventory\n-ma - Make Axe\n-mp - Make pickaxe\n-mt - Make Trap\n-wr - wreath")
 	print("-n - Nothing")
 	main()
 
-def make_tool(raw_m, raw_m1, m_raw_m):
-	if g.inventory_dict[raw_m] >= 6 and g.inventory_dict[raw_m1] >= 3:
+def make_tool(raw_m, raw_m1, m_raw_m, pc1, pc2):
+	if g.inventory_dict[raw_m] >= pc1 and g.inventory_dict[raw_m1] >= pc2:
 		g.inventory_dict[raw_m] -= 6
 		g.inventory_dict[raw_m1] -= 3
-		action_point -= 1
+		g.action_point -= 1
+		tmp_l = g.inventory_dict[m_raw_m]
+		tmp_l[0] += 1
+		g.inventory_dict[m_raw_m] = temp_l
 		print("Succesfull, +1 ", m_raw_m)
 	else:
 		print("Not enough raw materials")
@@ -97,7 +108,17 @@ def cooking(raw_m, co_raw_m):
 	else:
 		print("Not enough raw materials") 	
 def eating(raw_m):
-	print("eating")
+	temp_l = g.inventory_dict[raw_m]
+	if temp_l[0] > 0:
+		temp_l[0] -= 1
+		g.inventory_dict[raw_m] = temp_l
+		g.inventory_dict["hunger"] += temp_l[1]
+		g.inventory_dict["hp"] += temp_l[2]
+		g.inventory_dict["brain"] += temp_l[3]
+		print("Cheers")
+	else:
+		print("Not enough raw materials")
+
 def my_control(action, circle):
 		condition_chechker()
 		if action == "s" and g.pos_x != g.size_x -1:
@@ -136,17 +157,32 @@ def my_control(action, circle):
 			g.atlas[g.pos_x][g.pos_y] == "C"
 			print(g.atlas)
 		elif action == "ea":
-			eating()
+			print("b-Berry, c-Carrot, r-Rabbit, br-boiled berry, bc-boiled carrot, br-boiled rabbit")
+			activity = input("Enter the action command:")
+			if activity == 'b':
+				eating("berry")
+			elif activity == "c":
+				eating("carrot")
+			elif activity == "r":
+				eating("rabbit")
+			elif activity == "bb":
+				eating("bb")
+			elif activity == "bc":
+				eating("bc")
+			elif activity == "br":
+				eating("br")
 		elif action == "co":
-			berry_cooking()
+			cooking()
 		elif action == "ma":
-			make_axe()
+			make_tool("tree", "bough", "axe", 2, 3 )
 		elif action == "mp":
-			make_pickeaxe()
+			make_tool("tree", "grass", "pickaxe", 2, 2 )
 		elif action == "mt":
-			make_trap()
+			make_tool("grass", "bough", "trap", 6, 3 )
 		elif action == "cf":
-			make_camp_fire()
+			make_tool("tree", "stone", "campfire", 2, 4 )
+		elif action == "wr":
+			make_tool("flower", "bough", 15, 3 )
 		elif action == "in":
 			print(g.inventory_dict)
 		else: 
@@ -158,7 +194,7 @@ def condition_chechker():
 
 
 def main():
-		if g.inventory_dict["hp"] == 0 or g.inventory_dict["brain"] == 0 or g.inventory_dict["hunger"] == 0:
+		if g.inventory_dict["hp"] <= 0 or g.inventory_dict["brain"] <= 0 or g.inventory_dict["hunger"] <= 0:
 			print("Game Over")
 		else:
 			action = input("Enter the action command: \n")
@@ -179,12 +215,12 @@ if __name__ == "__main__":
 									"grass": 10,
 									"stone": 10,
 									"bough": 10,
-									"flower": 10,
-									"axe": 2,
-									"pickaxe": 1,
-									"campfire": 10,
-									"trap": 10,
-									"wreath": 10,
+									"flower": [10,10],
+									"axe": [2,10],
+									"pickaxe": [1,10],
+									"campfire": [10,10],
+									"trap": [10, 10],
+									"wreath": [10,15],
 									"berry": [10, 10, -5, 1],  #c/hunger/hp/brain
 									"carrot": [10, 10, 0, 1],
 									"rabbit": [10, 15, -8, 2],
