@@ -3,7 +3,7 @@ import sys
 import os
 
 class Game:
-	def __init__(self, action_point,size_x,size_y,pos_x,pos_y,inventory_dict, atlas,circle):
+	def __init__(self, action_point,size_x,size_y,pos_x,pos_y,inventory_dict, atlas,circle, part):
 		self.action_point = action_point
 		self.size_x = size_x
 		self.size_y = size_y
@@ -12,10 +12,10 @@ class Game:
 		self.inventory_dict = inventory_dict
 		self.atlas = atlas
 		self.circle = circle
+		self.part = part 
  
-
 def where_am_i(jump_atlas):
-	print(my_map)
+	g.action_point -= 1
 	if jump_atlas == "T" :
 			print("Wood cutting? y/n")
 			activity_tool(jump_atlas, "axe", "tree",10)
@@ -62,9 +62,7 @@ def activity_tool(jump_atlas, tool, raw_m, tool_cor): #pc,c
 def activity(jump_atlas, raw_m):
 	activity = input("Enter the action command: \n")
 	if activity == "y":
-		tmp_l = g.inventory_dict[raw_m]
-		tmp_l[0] += 1
-		g.inventory_dict[raw_m] = tmp_l
+		g.inventory_dict[raw_m] += 1
 		g.action_point -= 1
 		jump_atlas = "E"
 		g.atlas[g.pos_x][g.pos_y] = "E"
@@ -119,32 +117,27 @@ def eating(raw_m):
 	else:
 		print("Not enough raw materials")
 
-def my_control(action, circle):
-		condition_chechker()
+def my_control(action):
+		print("circle", g.circle," circle" )
 		if action == "s" and g.pos_x != g.size_x -1:
 			jump_atlas = g.atlas[g.pos_x+1][g.pos_y]
 			g.pos_x += 1
 			g.atlas[g.pos_x][g.pos_y] = "C"
 			where_am_i(jump_atlas)
-			g.circle += 1
 		elif action == "w" and g.pos_x != 0:
 			jump_atlas = g.atlas[g.pos_x-1][g.pos_y]
 			g.pos_x -= 1
 			g.atlas[g.pos_x][g.pos_y] = "C"
 			where_am_i(jump_atlas)
-			g.circle += 1
 		elif action == "d" and g.pos_y != g.size_y -1: #pos_y +1 
 			jump_atlas = g.atlas[g.pos_x][g.pos_y+1]
-			g.pos_y += 1
 			g.atlas[g.pos_x][g.pos_y] = "C"
 			where_am_i(jump_atlas)
-			g.circle += 1
 		elif action == "a" and g.pos_y != 0: #pos_y - 1 
 			jump_atlas = g.atlas[g.pos_x][g.pos_y-1]
 			g.pos_y -= 1
 			g.atlas[g.pos_x][g.pos_y] = "C"
 			where_am_i(jump_atlas)
-			g.circle += 1
 		elif action == "e":
 			where_am_i(jump_atlas)
 		elif action == "h":
@@ -188,17 +181,29 @@ def my_control(action, circle):
 		else: 
 			print("INVALID character")
 		main()
-def condition_chechker():
+def condition_checker():
 	if g.inventory_dict["hp"] < 10 or g.inventory_dict["brain"] < 10 or g.inventory_dict["hunger"] < 10:
 		print("eat or die")
-
+	g.inventory_dict["hunger"] -= 0.4
+def part_of_the_day():
+	condition_checker()
+	g.circle += 1
+	if not g.part:
+		tmp_l = g.inventory_dict["campfire"]
+		if tmp_l[2] == True:
+			print("kacsa")
+			
+	else:
+		print("kascsa")
+		print(g.atlas[g.pos_x:,:3][g.pos_y])
 
 def main():
 		if g.inventory_dict["hp"] <= 0 or g.inventory_dict["brain"] <= 0 or g.inventory_dict["hunger"] <= 0:
 			print("Game Over")
 		else:
+			part_of_the_day()
 			action = input("Enter the action command: \n")
-			my_control(action, g.circle)
+			my_control(action)
 if __name__ == "__main__":
 	try:
 		my_size_x, my_size_y  = 10 , 10
@@ -215,10 +220,10 @@ if __name__ == "__main__":
 									"grass": 10,
 									"stone": 10,
 									"bough": 10,
-									"flower": [10,10],
+									"flower": 10,
 									"axe": [2,10],
 									"pickaxe": [1,10],
-									"campfire": [10,10],
+									"campfire": [10,10,False],
 									"trap": [10, 10],
 									"wreath": [10,15],
 									"berry": [10, 10, -5, 1],  #c/hunger/hp/brain
@@ -229,7 +234,8 @@ if __name__ == "__main__":
 									"boiled_rabbit": [10, 22, 3, 4],
 			},
 			my_map,
-			0)
+			0,
+			True)
 		print("Enter the start to start/restart:")
 		main()
 	except KeyboardInterrupt:
