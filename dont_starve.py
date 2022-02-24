@@ -15,9 +15,8 @@ class Game:
 		self.part = part 
  
 def where_am_i(jump_atlas):
-	g.action_point -= 1
 	print(g.atlas)
-	#part_of_the_day()
+	part_of_the_day()
 	if jump_atlas == "T" :
 			print("Wood cutting? y/n")
 			activity_tool(jump_atlas, "axe", "tree",10)
@@ -69,6 +68,7 @@ def activity(jump_atlas, raw_m):
 		g.action_point -= 1
 		g.atlas[g.pos_x][g.pos_y] = "E"
 		print("OK, +1", raw_m)
+		if raw_m == "flower": g.inventory_dict["brain"] + 2
 	elif activity == "n":
 		g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
 		print("OK")
@@ -78,10 +78,9 @@ def activity(jump_atlas, raw_m):
 def helper():
 	print("Control: W,A,S,D\n-m Map\n-ea - Eating\n-cf - Campfire\n-co - Cooking")
 	print("-in - Inventory\n-ma - Make Axe\n-mp - Make pickaxe\n-mt - Make Trap\n-wr - wreath")
-	print("-n - Nothing")
+	print("-tr - trap_placement\n -n - Nothing")
 	print(g.atlas)
 	main()
-
 def make_tool(raw_m, raw_m1, m_raw_m, pc1, pc2):
 	if g.inventory_dict[raw_m] >= pc1 and g.inventory_dict[raw_m1] >= pc2:
 		g.inventory_dict[raw_m] -= 6
@@ -97,7 +96,6 @@ def make_tool(raw_m, raw_m1, m_raw_m, pc1, pc2):
 		print("Not enough raw materials")
 		g.atlas[g.pos_x][g.pos_y] = "C"
 		helper()
-
 def cooking(raw_m, co_raw_m):
 	tmp_l = g.inventory_dict[raw_m]
 	if tmp_l[0] >= 2:
@@ -122,7 +120,6 @@ def eating(raw_m):
 		print("Cheers")
 	else:
 		print("Not enough raw materials")
-
 def my_control(action):
 		print("circle" )
 		if action == "s" and g.pos_x != g.size_x -1:
@@ -173,6 +170,8 @@ def my_control(action):
 				eating("br")
 		elif action == "co":
 			cooking()
+		elif action == "tr":
+			trap_placement()
 		elif action == "ma":
 			make_tool("tree", "bough", "axe", 2, 3 )
 		elif action == "mp":
@@ -185,6 +184,8 @@ def my_control(action):
 			make_tool("flower", "bough", 15, 3 )
 		elif action == "in":
 			print(g.inventory_dict)
+		elif action == "n":
+			g.atlas[g.pos_x][g.pos_y] == "C"
 		else: 
 			print("INVALID character")
 		main()
@@ -192,22 +193,49 @@ def condition_checker():
 	if g.inventory_dict["hp"] < 10 or g.inventory_dict["brain"] < 10 or g.inventory_dict["hunger"] < 10:
 		print("eat or die")
 	g.inventory_dict["hunger"] -= 0.4
+	tmp_l = g.inventory_dict["wreath"]
+	if tmp_l and g.part:
+		g.inventory_dict["brain"] += 0.5
+	elif tmp_l and not g.part:
+		g.inventory_dict["brain"] -= 0.3
+	tmp_l = g.inventory_dict["trap"]
+	if tmp_l[1] > 0:
+		for i in range(tmp_l[1]):
+			rnd = random.randint(100, dtype = int)
+			if rnd == 33:
+				tmp_l = g.inventory_dict["rabbit"]
+				tmp_l[0] += 1
+				g.inventory_dict["rabbit"] = tmp_l
+
+def trap_placement():
+	tmp_l = g.inventory_dict["trap"]
+	if tmp_l[0] > 0:
+		tmp_l[0] -= 1
+		tmp_l[1] +=1
+		g.action_point -= 1
+		g.inventory_dict["trap"] = tmp_l
+		print("Succesfull")
+	else:
+		print("Not enough materials")
+
+
 def part_of_the_day():
 	condition_checker()
 	g.circle += 1
 	if not g.part:
+		g.inventory_dict["brain"] -= 0.4
 		tmp_l = g.inventory_dict["campfire"]
+		if tmp_l[0] == 0: main()
 		if tmp_l[2] == True:
 			for i in range(g.pos_x-3,7):
 				for j in rage(g.pos_y-3,7):
 					print(g.atlas[i][j])
+		if tmp_l[0] > 0 :
+			print("Make campfire")
+			
+
 	else:
-		print("kacsaasdsad")
-		for i in range(g.pos_x-3,11):
-			print()
-			for j in range(g.pos_y-3,11):
-				print(g.atlas[i][j], " ", end='')
-		print()
+		print(g.atlas)
 
 def main():
 		if g.inventory_dict["hp"] <= 0 or g.inventory_dict["brain"] <= 0 or g.inventory_dict["hunger"] <= 0:
@@ -235,8 +263,8 @@ if __name__ == "__main__":
 									"axe": [2,10],
 									"pickaxe": [1,10],
 									"campfire": [10,10,False],
-									"trap": [10, 10],
-									"wreath": [10,15],
+									"trap": [10, 1],
+									"wreath": [10,15, True],
 									"berry": [10, 10, -5, 1],  #c/hunger/hp/brain
 									"carrot": [10, 10, 0, 1],
 									"rabbit": [10, 15, -8, 2],
@@ -246,7 +274,7 @@ if __name__ == "__main__":
 			},
 			my_map,
 			0,
-			True)
+			False)
 		print("Enter the start to start/restart:")
 		main()
 	except KeyboardInterrupt:
