@@ -18,13 +18,13 @@ def where_am_i(jump_atlas):
 	print(my_map)
 	if jump_atlas == "T" and g.inventory_dict["axe"] > 0:
 			print("Wood cutting? y/n")
-			activity_wood(jump_atlas, "axe", "tree")
+			activity_tool(jump_atlas, "axe", "tree", 0.2)
 	elif jump_atlas == "G":
 			print("ingathering? y/n")
 			activity(jump_atlas, "grass")
 	elif jump_atlas == "S":
 			print("Stone Mining? y/n")
-			activity_stone(jump_atlas, "pickaxe", "stone")
+			activity_tool(jump_atlas, "pickaxe", "stone", 0.3)
 	elif jump_atlas == "B":
 			print("ingathering? y/n")
 			activity(jump_atlas, "bough")
@@ -37,11 +37,11 @@ def where_am_i(jump_atlas):
 			print("EMPTY")
 			g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
 	helper()
-def activity_wood(jump_atlas, tool, raw_m ):
+def activity_tool(jump_atlas, tool, raw_m, tool_cor ):
 	activity = input("Enter the action command: \n")
 	if activity == "y":
 		print("OK")
-		g.inventory_dict[tool] -= 0.1
+		g.inventory_dict[tool] -= tool_cor
 		g.inventory_dict[raw_m]+=1
 		g.action_point -= 1
 		jump_atlas = "E"
@@ -50,21 +50,6 @@ def activity_wood(jump_atlas, tool, raw_m ):
 	elif activity == "n": 
 		g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
 		print("OK, EXIT")
-	else:
-		print("INVALID character")
-		where_am_i(jump_atlas)
-def activity_stone(jump_atlas, tool, raw_m):
-	activity = input("Enter the action command: \n")
-	if activity == "y":
-		g.inventory_dict[tool] -= 0.2
-		g.inventory_dict[raw_m] += 1
-		g.action_point -= 1
-		jump_atlas = "E"
-		g.atlas[g.pos_x][g.pos_y] = jump_atlas
-		print("OK, +1", raw_m)
-	elif activity == "n":
-		g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
-		print("Ok, Exit")
 	else:
 		print("INVALID character")
 		where_am_i(jump_atlas)
@@ -88,7 +73,7 @@ def helper():
 	print("-n - Nothing")
 	main()
 
-def make_trap(raw_m, raw_m1, m_raw_m):
+def make_tool(raw_m, raw_m1, m_raw_m):
 	if g.inventory_dict[raw_m] >= 6 and g.inventory_dict[raw_m1] >= 3:
 		g.inventory_dict[raw_m] -= 6
 		g.inventory_dict[raw_m1] -= 3
@@ -108,7 +93,7 @@ def cooking(raw_m, co_raw_m):
 		tmp_l = g.inventory_dict[co_raw_m]
 		tmp_l[0] += 1
 		g.inventory_dict[co_raw_m] = tmp_l
-		print("Succesfull, +1 " co_raw_m)
+		print("Succesfull, +1 ", co_raw_m)
 	else:
 		print("Not enough raw materials") 	
 def eating(raw_m):
@@ -172,10 +157,6 @@ def condition_chechker():
 		print("eat or die")
 
 
-
-
-
-
 def main():
 		if g.inventory_dict["hp"] == 0 or g.inventory_dict["brain"] == 0 or g.inventory_dict["hunger"] == 0:
 			print("Game Over")
@@ -191,7 +172,7 @@ if __name__ == "__main__":
 						size=(my_size_x, my_size_y))
 		g = Game(100,my_size_x,my_size_y,my_pos_x,my_pos_y,
 			{
-									"hp":100,
+									"hp":9,
 									"brain":100,
 									"hunger":100,
 									"tree": 10,
