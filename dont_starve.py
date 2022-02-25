@@ -1,6 +1,7 @@
 from numpy import random
 import sys
 import os
+import time
 
 class Game:
 	def __init__(self, action_point,size_x,size_y,pos_x,pos_y,inventory_dict, atlas,circle, part):
@@ -15,7 +16,6 @@ class Game:
 		self.part = part 
  
 def where_am_i(jump_atlas):
-	print(g.atlas)
 	part_of_the_day()
 	if jump_atlas == "T" :
 			print("Wood cutting? y/n")
@@ -36,8 +36,8 @@ def where_am_i(jump_atlas):
 			print("WATER")
 	elif jump_atlas == "E":
 			print("EMPTY")
+			print(jump_atlas)
 			g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
-	
 def activity_tool(jump_atlas, tool, raw_m, tool_cor): #pc,c
 	activity = input("Enter the action command: \n")
 	if activity == "y":
@@ -78,7 +78,7 @@ def activity(jump_atlas, raw_m):
 def helper():
 	print("Control: W,A,S,D\n-m Map\n-ea - Eating\n-cf - Campfire\n-co - Cooking")
 	print("-in - Inventory\n-ma - Make Axe\n-mp - Make pickaxe\n-mt - Make Trap\n-wr - wreath")
-	print("-tr - trap_placement\n -n - Nothing")
+	print("-tr - trap_placement\n -n - Nothing\n-cp - campfire place")
 	print(g.atlas)
 	main()
 def make_tool(raw_m, raw_m1, m_raw_m, pc1, pc2):
@@ -89,7 +89,7 @@ def make_tool(raw_m, raw_m1, m_raw_m, pc1, pc2):
 		tmp_l = g.inventory_dict[m_raw_m]
 		tmp_l[0] += 1
 		g.atlas[g.pos_x][g.pos_y] = "E"
-		g.inventory_dict[m_raw_m] = temp_l
+		g.inventory_dict[m_raw_m] = tmp_l
 		print("Succesfull, +1 ", m_raw_m)
 	else:
 		g.atlas[g.pos_x][g.pos_y] = jump_atlas.capitalize()
@@ -121,7 +121,6 @@ def eating(raw_m):
 	else:
 		print("Not enough raw materials")
 def my_control(action):
-		print("circle" )
 		if action == "s" and g.pos_x != g.size_x -1:
 			jump_atlas = g.atlas[g.pos_x+1][g.pos_y]
 			g.pos_x += 1
@@ -152,7 +151,11 @@ def my_control(action):
 			where_am_i(jump_atlas)
 		elif action == "m":
 			g.atlas[g.pos_x][g.pos_y] == "C"
-			print(g.atlas)
+			part_of_the_day()
+
+		elif action == "cp":
+			campfire_placement()
+			part_of_the_day()
 		elif action == "ea":
 			print("b-Berry, c-Carrot, r-Rabbit, br-boiled berry, bc-boiled carrot, br-boiled rabbit")
 			activity = input("Enter the action command:")
@@ -169,7 +172,7 @@ def my_control(action):
 			elif activity == "br":
 				eating("br")
 		elif action == "co":
-			cooking()
+			cooking("berry", "boiled_berry")
 		elif action == "tr":
 			trap_placement()
 		elif action == "ma":
@@ -189,6 +192,7 @@ def my_control(action):
 		else: 
 			print("INVALID character")
 		main()
+
 def condition_checker():
 	if g.inventory_dict["hp"] < 10 or g.inventory_dict["brain"] < 10 or g.inventory_dict["hunger"] < 10:
 		print("eat or die")
@@ -199,14 +203,20 @@ def condition_checker():
 	elif tmp_l and not g.part:
 		g.inventory_dict["brain"] -= 0.3
 	tmp_l = g.inventory_dict["trap"]
-	if tmp_l[1] > 0:
+	if tmp_l[1] != 0:
 		for i in range(tmp_l[1]):
 			rnd = random.randint(100, dtype = int)
 			if rnd == 33:
 				tmp_l = g.inventory_dict["rabbit"]
 				tmp_l[0] += 1
 				g.inventory_dict["rabbit"] = tmp_l
-
+	tmp_l = g.inventory_dict["campfire"]
+	if tmp_l[4] > 0 :
+		tmp_l[4] -= 1
+		g.inventory_dict["campfire"] = tmp_l
+		if tmp_l[4] == 0:
+			g.atlas[tmp_l[2]][tmp_l[3]] = "E"
+	if tmp_l[1] == True and tmp_l[2] == g.pos_x and tmp_l[3] == g.pos_y and tmp_l[4] % 10 != 0: g.inventory_dict["hp"] = 0
 def trap_placement():
 	tmp_l = g.inventory_dict["trap"]
 	if tmp_l[0] > 0:
@@ -217,23 +227,37 @@ def trap_placement():
 		print("Succesfull")
 	else:
 		print("Not enough materials")
-
-
+def campfire_placement():
+	tmp_l = g.inventory_dict["campfire"]
+	if not tmp_l[1]:
+		g.action_point -= 2
+		tmp_l[0] -= 1
+		tmp_l[1] = True
+		tmp_l[2] = g.pos_x
+		tmp_l[3] = g.pos_y
+		tmp_l[4] = 11
+		g.atlas[g.pos_x][g.pos_y] = "P"
 def part_of_the_day():
 	condition_checker()
 	g.circle += 1
+	if g.circle % 12 == 0:
+		g.part = False
+	elif g.circle % 4 == 0: 
+		g.part = True
 	if not g.part:
 		g.inventory_dict["brain"] -= 0.4
 		tmp_l = g.inventory_dict["campfire"]
-		if tmp_l[0] == 0: main()
-		if tmp_l[2] == True:
-			for i in range(g.pos_x-3,7):
-				for j in rage(g.pos_y-3,7):
-					print(g.atlas[i][j])
-		if tmp_l[0] > 0 :
+		if tmp_l[0] == 0: 
+			print("Make Campfire") 
+			main()
+		if tmp_l[1] == True:
+			for i in range(tmp_l[2]-3,11):
+				for j in range(tmp_l[3]-3,11):
+					print(g.atlas[i][j], end = ' ' )
+				print()
+		elif tmp_l[0] > 0 and tmp_l[1] == False:
 			print("Make campfire")
-			
-
+			main()		
 	else:
 		print(g.atlas)
 
@@ -241,7 +265,10 @@ def main():
 		if g.inventory_dict["hp"] <= 0 or g.inventory_dict["brain"] <= 0 or g.inventory_dict["hunger"] <= 0:
 			print("Game Over")
 		else:
-			action = input("Enter the action command: \n")
+			if g.circle == 0: 
+				my_control("start")
+			print("Enter the action command:  ", end = '')
+			action = input()
 			my_control(action)
 if __name__ == "__main__":
 	try:
@@ -262,8 +289,8 @@ if __name__ == "__main__":
 									"flower": 10,
 									"axe": [2,10],
 									"pickaxe": [1,10],
-									"campfire": [10,10,False],
-									"trap": [10, 1],
+									"campfire": [10,False, 0, 0, 0],
+									"trap": [10,1],
 									"wreath": [10,15, True],
 									"berry": [10, 10, -5, 1],  #c/hunger/hp/brain
 									"carrot": [10, 10, 0, 1],
@@ -273,9 +300,9 @@ if __name__ == "__main__":
 									"boiled_rabbit": [10, 22, 3, 4],
 			},
 			my_map,
-			0,
-			False)
-		print("Enter the start to start/restart:")
+			1,
+			True)
+		print(" -h- help")
 		main()
 	except KeyboardInterrupt:
 		print("Interrupted")
