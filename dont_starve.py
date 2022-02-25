@@ -1,7 +1,6 @@
 from numpy import random
 import sys
 import os
-import time
 
 class Game:
 	def __init__(self, action_point,size_x,size_y,pos_x,pos_y,inventory_dict, atlas,circle, part):
